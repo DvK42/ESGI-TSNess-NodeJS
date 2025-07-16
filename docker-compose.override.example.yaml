@@ -1,0 +1,12 @@
+services:
+  mongo:
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: tsness
+      MONGO_INITDB_ROOT_PASSWORD: azerty
+
+  app:
+    ports:
+      - 3012:3000
+

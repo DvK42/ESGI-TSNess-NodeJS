@@ -1,29 +1,50 @@
-import { config } from 'dotenv';
-config();
+import express from "express";
 
-import connectDB from './db';
-import express from 'express';
-const app = express();
-app.use(express.json());
-
-import userRoutes from './routes/users';
-app.use('/api/users', userRoutes);
+import { openConnection } from "./mongoose";
+import { UserRole } from "./models";
+import { AuthController, UserController} from "./controllers";
+import { UserService, SessionService } from "./services";
+import { FIRST_ACCOUNT_EMAIL, FIRST_ACCOUNT_PASSWORD } from "./utils/tools";
 
 const startServer = async () => {
-  try {
-    await connectDB();
+  const app = express();
+  const connection = await openConnection();
 
-    // ✅ Importer le seeder APRÈS la connexion
-    await import('./seeders/users');
+  const userService = new UserService(connection);
+  const sessionService = new SessionService(connection);
+  
+  const authController = new AuthController(userService, sessionService);
+  const userController = new UserController(userService, sessionService);
 
-    const port = process.env.PORT || 3001;
-    app.listen(port, () => {
-      console.log(`🚀 Serveur démarré sur http://localhost:${port}`);
-    });
-  } catch (err) {
-    console.error('❌ Échec de démarrage :', err);
-    process.exit(1);
+  await bootstrap(userService);
+
+  app.use('/api', authController.buildRouter());
+  app.use('api/users', userController.buildRouter());
+
+  app.listen(3000, () => console.log(`Listening on port 3000`));
+}
+
+const bootstrap = async (userService: UserService) => {
+  if(FIRST_ACCOUNT_EMAIL === undefined) {
+    throw new Error('FIRST_ACCOUNT_EMAIL is not defined');
   }
-};
 
-startServer();
+  if(FIRST_ACCOUNT_PASSWORD === undefined) {
+    throw new Error('FIRST_ACCOUNT_PASSWORD is not defined');
+  }
+
+  const rootUser = await userService.findUser(FIRST_ACCOUNT_EMAIL);
+  if(!rootUser) {
+    // ✅ Importer le seeder APRÈS la connexion
+    // await import('./seeders/users');
+    await userService.createUser({
+      firstName: 'Admin',
+      lastName: 'Platform',
+      password: FIRST_ACCOUNT_PASSWORD,
+      email: FIRST_ACCOUNT_EMAIL,
+      role: UserRole.ADMIN
+    });
+  }
+}
+
+startServer().catch(console.error);

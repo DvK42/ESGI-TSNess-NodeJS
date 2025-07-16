@@ -10,16 +10,18 @@
     "type": "git",
     "url": "git+https://github.com/DvK42/ESGI-TSNess-NodeJS.git"
   },
-  "license": "ISC",
-  "author": "",
-  "type": "commonjs",
   "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "scripts": {
+    "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
+    "@types/node": "^24.0.13",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.3",
     "@types/mongoose": "^5.11.96",
@@ -28,8 +30,8 @@
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "dotenv": "^16.5.0",
+    "dotenv": "^17.2.0",
     "express": "^5.1.0",
-    "mongoose": "^8.16.0"
+    "mongoose": "^8.16.3"
   }
 }
