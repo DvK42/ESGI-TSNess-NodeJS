@@ -1,6 +1,7 @@
-import { Mongoose, Model, isValidObjectId } from "mongoose";
-import { Gym, Difficulty } from "../models";
+import { Model, Mongoose, isValidObjectId } from "mongoose";
+import { Gym } from "../models";
 import { gymSchema } from "../mongoose";
+import { Difficulty } from "../utils/enums/difficulty";
 
 export class GymService {
     readonly model: Model<Gym>;
