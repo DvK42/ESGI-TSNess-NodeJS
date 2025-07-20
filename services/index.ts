@@ -4,3 +4,4 @@ export * from './gymEquipmentService';
 export * from './exerciseTypeService';
 export * from './equipmentService';
 export * from './gymService';
+export * from './exerciseService';

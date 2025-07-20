@@ -2,8 +2,8 @@ import express from "express";
 
 import { openConnection } from "./mongoose";
 import { UserRole } from "./models";
-import { AuthController, ExerciseTypeController, UserController, EquipmentController, GymController, GymEquipmentController } from "./controllers";
-import { UserService, SessionService, EquipmentService, ExerciseTypeService, GymService, GymEquipmentService } from "./services";
+import { AuthController, ExerciseTypeController, UserController, EquipmentController, GymController, GymEquipmentController, ExerciseController } from "./controllers";
+import { UserService, SessionService, EquipmentService, ExerciseTypeService, GymService, GymEquipmentService, ExerciseService } from "./services";
 import { FIRST_ACCOUNT_EMAIL, FIRST_ACCOUNT_PASSWORD } from "./utils/tools";
 
 const startServer = async () => {
@@ -16,6 +16,7 @@ const startServer = async () => {
     const equipmentService = new EquipmentService(connection);
     const gymService = new GymService(connection);
     const gymEquipmentService = new GymEquipmentService(connection);
+    const exerciseService = new ExerciseService(connection);
 
     const authController = new AuthController(userService, sessionService);
     const userController = new UserController(userService, sessionService);
@@ -23,6 +24,7 @@ const startServer = async () => {
     const equipmentController = new EquipmentController(equipmentService, sessionService);
     const gymController = new GymController(gymService, sessionService);
     const gymEquipmentController = new GymEquipmentController(gymEquipmentService, sessionService);
+    const exerciseController = new ExerciseController(exerciseService, sessionService);
 
     await bootstrap(userService);
 
@@ -32,6 +34,7 @@ const startServer = async () => {
     app.use('/api/equipments', equipmentController.buildRouter());
     app.use('/api/gyms', gymController.buildRouter());
     app.use('/api/gym-equipments', gymEquipmentController.buildRouter());
+    app.use('/api/exercises', exerciseController.buildRouter());
 
     app.listen(3000, () => console.log(`Listening on port 3000`));
 }

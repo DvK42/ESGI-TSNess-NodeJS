@@ -1,12 +1,7 @@
 import { ExerciseType } from "./exerciseType";
 import { Timestamps } from "./timestamps";
 import { User } from "./user";
-
-export enum Difficulty {
-    EASY = 'EASY',
-    MEDIUM = 'MEDIUM',
-    HARD = 'HARD'
-}
+import { Difficulty } from "../utils/enums/difficulty";
 
 export interface Gym extends Timestamps {
     _id: string;

@@ -1,22 +1,24 @@
-import { Request, Response, Router, json } from "express";
-import { GymService, SessionService } from "../services";
-import { Gym, Difficulty, UserRole } from "../models";
-import { roleMiddleware, sessionMiddleware } from "../middlewares";
+import {json, Request, Response, Router} from "express";
+import {GymService, SessionService} from "../services";
+import {Gym, UserRole} from "../models";
+import {Difficulty} from "../utils/enums/difficulty";
+import {roleMiddleware, sessionMiddleware} from "../middlewares";
 
 export class GymController {
     constructor(
         public readonly gymService: GymService,
         public readonly sessionService: SessionService
-    ) { }
+    ) {
+    }
 
     async createGym(req: Request, res: Response) {
         if (!req.body || !req.body.name || !req.body.capacity || !req.body.address || !req.body.contact || !req.body.manager || !req.body.exerciseTypes || !req.body.descriptionEquipments || !req.body.descriptionExerciseTypes) {
-            res.status(400).json({ error: "Missing required fields: name, capacity, address, contact, manager, exerciseTypes, descriptionEquipments, descriptionExerciseTypes" });
+            res.status(400).json({error: "Missing required fields: name, capacity, address, contact, manager, exerciseTypes, descriptionEquipments, descriptionExerciseTypes"});
             return;
         }
 
         if (!Array.isArray(req.body.exerciseTypes)) {
-            res.status(400).json({ error: "exerciseTypes must be an array" });
+            res.status(400).json({error: "exerciseTypes must be an array"});
             return;
         }
 
@@ -29,18 +31,11 @@ export class GymController {
         }
 
         try {
-            // Vérifier si le nom existe déjà
-            const existingGym = await this.gymService.findGymByName(req.body.name);
-            if (existingGym) {
-                res.status(409).json({ error: "Gym with this name already exists" });
-                return;
-            }
-
             const gym = await this.gymService.createGym(req.body as Gym);
             res.status(201).json(gym);
         } catch (error) {
             console.error('Error creating gym:', error);
-            res.status(500).json({ error: "Failed to create gym" });
+            res.status(500).json({error: "Failed to create gym"});
         }
     }
 
@@ -49,32 +44,32 @@ export class GymController {
             const gyms = await this.gymService.getAllGyms();
             res.status(200).json(gyms);
         } catch (error) {
-            res.status(500).json({ error: "Failed to fetch gyms" });
+            res.status(500).json({error: "Failed to fetch gyms"});
         }
     }
 
     async getGymById(req: Request, res: Response) {
-        const { id } = req.params;
+        const {id} = req.params;
 
         try {
             const gym = await this.gymService.findGymById(id);
 
             if (!gym) {
-                res.status(404).json({ error: "Gym not found" });
+                res.status(404).json({error: "Gym not found"});
                 return;
             }
 
             res.status(200).json(gym);
         } catch (error) {
-            res.status(500).json({ error: "Failed to fetch gym" });
+            res.status(500).json({error: "Failed to fetch gym"});
         }
     }
 
     async updateGym(req: Request, res: Response) {
-        const { id } = req.params;
+        const {id} = req.params;
 
         if (!req.body || (!req.body.name && !req.body.address && !req.body.contact && !req.body.difficulty && !req.body.exerciseTypes && !req.body.descriptionEquipments && !req.body.descriptionExerciseTypes && !req.body.isApproved)) {
-            res.status(400).json({ error: "At least one field is required" });
+            res.status(400).json({error: "At least one field is required"});
             return;
         }
 
@@ -87,7 +82,7 @@ export class GymController {
         }
 
         if (req.body.exerciseTypes && !Array.isArray(req.body.exerciseTypes)) {
-            res.status(400).json({ error: "exerciseTypes must be an array" });
+            res.status(400).json({error: "exerciseTypes must be an array"});
             return;
         }
 
@@ -95,35 +90,35 @@ export class GymController {
             const updatedGym = await this.gymService.updateGym(id, req.body);
 
             if (!updatedGym) {
-                res.status(404).json({ error: "Gym not found" });
+                res.status(404).json({error: "Gym not found"});
                 return;
             }
 
             res.status(200).json(updatedGym);
         } catch (error) {
-            res.status(500).json({ error: "Failed to update gym" });
+            res.status(500).json({error: "Failed to update gym"});
         }
     }
 
     async deleteGym(req: Request, res: Response) {
-        const { id } = req.params;
+        const {id} = req.params;
 
         try {
             const deleted = await this.gymService.deleteGym(id);
 
             if (!deleted) {
-                res.status(404).json({ error: "Gym not found" });
+                res.status(404).json({error: "Gym not found"});
                 return;
             }
 
             res.status(204).end();
         } catch (error) {
-            res.status(500).json({ error: "Failed to delete gym" });
+            res.status(500).json({error: "Failed to delete gym"});
         }
     }
 
     async getGymsByDifficulty(req: Request, res: Response) {
-        const { difficulty } = req.params;
+        const {difficulty} = req.params;
 
         if (!Object.values(Difficulty).includes(difficulty as Difficulty)) {
             res.status(400).json({
@@ -137,18 +132,18 @@ export class GymController {
             const gyms = await this.gymService.findGymsByDifficulty(difficulty as Difficulty);
             res.status(200).json(gyms);
         } catch (error) {
-            res.status(500).json({ error: "Failed to fetch gyms by difficulty" });
+            res.status(500).json({error: "Failed to fetch gyms by difficulty"});
         }
     }
 
     async getGymsByManager(req: Request, res: Response) {
-        const { managerId } = req.params;
+        const {managerId} = req.params;
 
         try {
             const gyms = await this.gymService.findGymsByManager(managerId);
             res.status(200).json(gyms);
         } catch (error) {
-            res.status(500).json({ error: "Failed to fetch gyms by manager" });
+            res.status(500).json({error: "Failed to fetch gyms by manager"});
         }
     }
 
@@ -157,7 +152,7 @@ export class GymController {
             const gyms = await this.gymService.findApprovedGyms();
             res.status(200).json(gyms);
         } catch (error) {
-            res.status(500).json({ error: "Failed to fetch approved gyms" });
+            res.status(500).json({error: "Failed to fetch approved gyms"});
         }
     }
 
@@ -166,41 +161,41 @@ export class GymController {
             const gyms = await this.gymService.findPendingGyms();
             res.status(200).json(gyms);
         } catch (error) {
-            res.status(500).json({ error: "Failed to fetch pending gyms" });
+            res.status(500).json({error: "Failed to fetch pending gyms"});
         }
     }
 
     async approveGym(req: Request, res: Response) {
-        const { id } = req.params;
+        const {id} = req.params;
 
         try {
             const approvedGym = await this.gymService.approveGym(id);
 
             if (!approvedGym) {
-                res.status(404).json({ error: "Gym not found" });
+                res.status(404).json({error: "Gym not found"});
                 return;
             }
 
             res.status(200).json(approvedGym);
         } catch (error) {
-            res.status(500).json({ error: "Failed to approve gym" });
+            res.status(500).json({error: "Failed to approve gym"});
         }
     }
 
     async rejectGym(req: Request, res: Response) {
-        const { id } = req.params;
+        const {id} = req.params;
 
         try {
             const rejectedGym = await this.gymService.rejectGym(id);
 
             if (!rejectedGym) {
-                res.status(404).json({ error: "Gym not found" });
+                res.status(404).json({error: "Gym not found"});
                 return;
             }
 
             res.status(200).json(rejectedGym);
         } catch (error) {
-            res.status(500).json({ error: "Failed to reject gym" });
+            res.status(500).json({error: "Failed to reject gym"});
         }
     }
 
@@ -253,4 +248,4 @@ export class GymController {
 
         return router;
     }
-} 
+}

@@ -1,5 +1,6 @@
 import { Schema, Types } from "mongoose";
-import { Difficulty, Gym } from "../../models";
+import { Gym } from "../../models";
+import { Difficulty } from "../../utils/enums/difficulty";
 
 
 export const gymSchema = new Schema<Gym>(
