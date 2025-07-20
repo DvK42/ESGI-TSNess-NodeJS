@@ -138,3 +138,4 @@ dist
 
 # ----------- #
 docker-compose.override.yaml
+.idea
