@@ -1,2 +1,7 @@
 export * from './userService';
 export * from './sessionService';
+export * from './gymEquipmentService';
+export * from './exerciseTypeService';
+export * from './equipmentService';
+export * from './gymService';
+export * from './exerciseService';

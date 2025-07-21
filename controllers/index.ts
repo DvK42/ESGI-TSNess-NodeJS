@@ -1,2 +1,7 @@
 export * from './authController';
 export * from './userController';
+export * from './exerciseTypeController';
+export * from './equipmentController';
+export * from './gymController';
+export * from './gymEquipmentController';
+export * from './exerciseController';
