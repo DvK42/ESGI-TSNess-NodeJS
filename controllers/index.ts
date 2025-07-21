@@ -5,3 +5,4 @@ export * from './equipmentController';
 export * from './gymController';
 export * from './gymEquipmentController';
 export * from './exerciseController';
+export * from './trainingController';

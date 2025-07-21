@@ -5,3 +5,4 @@ export * from './exerciseTypeService';
 export * from './equipmentService';
 export * from './gymService';
 export * from './exerciseService';
+export * from './trainingService';
