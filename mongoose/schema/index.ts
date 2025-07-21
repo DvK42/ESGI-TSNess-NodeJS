@@ -5,3 +5,7 @@ export * from './exerciseType';
 export * from './gymEquipment';
 export * from './equipment';
 export * from './exercise';
+export * from './training';
+export * from './result';
+export * from './challenge';
+export * from './challengeTry';
