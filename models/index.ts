@@ -4,4 +4,5 @@ export * from './gym';
 export * from './exerciseType';
 export * from './equipment';
 export * from './gymEquipment';
-export * from './Exercise';
+export * from './exercise';
+

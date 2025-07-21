@@ -2,7 +2,7 @@ import {Schema} from "mongoose";
 import {Exercise} from "../../models";
 import {Difficulty} from "../../utils/enums/difficulty";
 
-export const ExerciseSchema = new Schema<Exercise>({
+export const exerciseSchema = new Schema<Exercise>({
         name: {type: String, required: true},
         description: {type: String, required: true},
         difficulty: {type: String, required: true, enum: Object.values(Difficulty)},

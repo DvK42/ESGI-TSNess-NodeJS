@@ -1,12 +1,12 @@
 import {isValidObjectId, Model, Mongoose} from "mongoose";
 import {Exercise} from "../models";
-import {ExerciseSchema} from "../mongoose";
+import {exerciseSchema} from "../mongoose";
 
 export class ExerciseService {
     readonly model: Model<Exercise>;
 
     constructor(public readonly connection: Mongoose) {
-        this.model = connection.model('Exercise', ExerciseSchema);
+        this.model = connection.model('Exercise', exerciseSchema);
     }
 
     async findExerciseById(exerciseId: string): Promise<Exercise | null> {
