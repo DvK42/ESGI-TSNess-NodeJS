@@ -20,9 +20,12 @@ import {
     GymService,
     GymEquipmentService,
     ExerciseService,
-    TrainingService
+    TrainingService,
+    ChallengeService,
+    ChallengeTryService
 } from "./services";
 import { FIRST_ACCOUNT_EMAIL, FIRST_ACCOUNT_PASSWORD } from "./utils/tools";
+import { ChallengeController } from "./controllers/challengeController";
 
 const startServer = async () => {
     const app = express();
@@ -36,6 +39,8 @@ const startServer = async () => {
     const gymEquipmentService = new GymEquipmentService(connection);
     const exerciseService = new ExerciseService(connection);
     const trainingService = new TrainingService(connection);
+    const challengeService = new ChallengeService(connection, trainingService);
+    const challengeTryService = new ChallengeTryService(connection);
 
     const authController = new AuthController(userService, sessionService);
     const userController = new UserController(userService, sessionService);
@@ -45,6 +50,7 @@ const startServer = async () => {
     const gymEquipmentController = new GymEquipmentController(gymEquipmentService, sessionService);
     const exerciseController = new ExerciseController(exerciseService, sessionService);
     const trainingController = new TrainingController(trainingService, sessionService);
+    const challengeController = new ChallengeController(challengeService, sessionService);
 
     await bootstrap(userService);
 
@@ -56,6 +62,7 @@ const startServer = async () => {
     app.use('/api/gym-equipments', gymEquipmentController.buildRouter());
     app.use('/api/exercises', exerciseController.buildRouter());
     app.use('/api/trainings', trainingController.buildRouter());
+    app.use('/api/challenges', challengeController.buildRouter());
 
     app.listen(3000, () => console.log(`Listening on port 3000`));
 }

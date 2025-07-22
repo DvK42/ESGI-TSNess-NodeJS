@@ -158,12 +158,6 @@ export class ChallengeController {
       return;
     }
 
-    if (!req.body || Object.keys(req.body).length === 0) {
-      res.status(400).json({ error: "No update data provided" });
-
-      return;
-    }
-
     if (req.body.trainingId && typeof req.body.trainingId !== 'string') {
       res.status(400).json({ error: "Training ID must be a string" });
 
@@ -286,14 +280,14 @@ export class ChallengeController {
     );
 
     router.get(
-      '/:creatorId',
+      '/creator/:creatorId',
       sessionMiddleware(this.sessionService),
       roleMiddleware(UserRole.USER),
       this.getChallengesByCreator.bind(this)
     );
 
     router.get(
-      '/:gymId',
+      '/gym/:gymId',
       sessionMiddleware(this.sessionService),
       roleMiddleware(UserRole.USER),
       this.getChallengesByGym.bind(this)

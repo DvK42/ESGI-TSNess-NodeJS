@@ -3,7 +3,7 @@ import { isValidObjectId, Model, Mongoose } from "mongoose";
 import { Challenge, Result, ResultData, User, UserRole } from "../models";
 import { challengeSchema, resultSchema } from "../mongoose";
 import { TrainingService } from "./trainingService";
-import { validateHigherOrEqualResults } from "../utils/validator";
+import { validateResults } from "../utils/validator";
 
 export type createChallenge = Omit<Challenge, '_id' | 'createdAt' | 'updatedAt' | 'creator'> & {
   results?: Array<Omit<Result, '_id' | 'createdAt' | 'updatedAt'>>;
@@ -35,7 +35,7 @@ export class ChallengeService {
     const challengeData = {
       ...challenge,
       creator: user._id,
-      results: resultIds
+      targetResults: resultIds
     };
     
     const createChallenge = await this.challengeModel.create(challengeData);
@@ -62,7 +62,7 @@ export class ChallengeService {
   async findChallenges(limit?: number, offset?: number): Promise<Challenge[]> {
     const query = this.challengeModel.find()
       .populate({
-        path: 'results',
+        path: 'targetResults',
         populate: { path: 'exercise' }
       })
       .sort({ createdAt: -1 });
@@ -84,7 +84,7 @@ export class ChallengeService {
     
     const query = this.challengeModel.find({ creator: userId })
       .populate({
-        path: 'results',
+        path: 'targetResults',
         populate: { path: 'exercise' }
       })
       .sort({ createdAt: -1 });
@@ -106,7 +106,7 @@ export class ChallengeService {
     
     const query = this.challengeModel.find({ gym: gymId })
       .populate({
-        path: 'results',
+        path: 'targetResults',
         populate: { path: 'exercise' }
       })
       .sort({ createdAt: -1 });
@@ -151,10 +151,10 @@ export class ChallengeService {
         return false;
       }
 
-      return validateHigherOrEqualResults(targetResult, trainingResults[exerciseId]);
+      return validateResults(targetResult, trainingResults[exerciseId]);
     })
 
-
+    // save en bdd a implementer
 
     return isCompleted;
   }
@@ -189,7 +189,7 @@ export class ChallengeService {
     const updatedChallenge = await this.challengeModel
       .findByIdAndUpdate(challengeId, updateData, { new: true })
       .populate({
-        path: 'results',
+        path: 'targetResults',
         populate: { path: 'exercise' }
       });
 
