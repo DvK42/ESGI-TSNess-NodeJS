@@ -11,3 +11,5 @@ export * from "./result";
 export * from "./challenge";
 export * from "./challengeTry";
 export * from "./challengeGroupTry";
+export * from './badge';
+export * from './userBadge';

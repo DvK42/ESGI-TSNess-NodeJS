@@ -8,13 +8,14 @@ export interface Result extends Timestamps {
 }
 
 export interface ResultData {
-  nbSeries?: number;
-  nbRepetitions?: number;
+  nbSeries?: number | string | undefined;
+  nbRepetitions?: number | string;
   // In grams
-  weight?: number;
+  weight?: number | string;
   // In seconds
-  duration?: number;
-  caloriesBurned?: number;
+  duration?: number | string;
+  caloriesBurned?: number | string;
   // Additional data can be added here
+  [key: string]: number | string | undefined;
 }
 

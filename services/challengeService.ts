@@ -1,9 +1,8 @@
 import { isValidObjectId, Model, Mongoose } from "mongoose";
 
-import { Challenge, Result, ResultData, User, UserRole } from "../models";
+import { Challenge, Result, User, UserRole } from "../models";
 import { challengeSchema, resultSchema } from "../mongoose";
 import { TrainingService } from "./trainingService";
-import { validateResults } from "../utils/validator";
 import { ChallengeTryService } from "./challengeTryService";
 
 export type createChallenge = Omit<Challenge, '_id' | 'createdAt' | 'updatedAt' | 'creator'> & {
