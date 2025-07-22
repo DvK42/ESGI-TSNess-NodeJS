@@ -2,8 +2,26 @@ import express from "express";
 
 import { openConnection } from "./mongoose";
 import { UserRole } from "./models";
-import { AuthController, ExerciseTypeController, UserController, EquipmentController, GymController, GymEquipmentController, ExerciseController } from "./controllers";
-import { UserService, SessionService, EquipmentService, ExerciseTypeService, GymService, GymEquipmentService, ExerciseService } from "./services";
+import {
+    AuthController,
+    ExerciseTypeController,
+    UserController,
+    EquipmentController,
+    GymController,
+    GymEquipmentController,
+    ExerciseController,
+    TrainingController
+} from "./controllers";
+import {
+    UserService,
+    SessionService,
+    EquipmentService,
+    ExerciseTypeService,
+    GymService,
+    GymEquipmentService,
+    ExerciseService,
+    TrainingService
+} from "./services";
 import { FIRST_ACCOUNT_EMAIL, FIRST_ACCOUNT_PASSWORD } from "./utils/tools";
 
 const startServer = async () => {
@@ -17,6 +35,7 @@ const startServer = async () => {
     const gymService = new GymService(connection);
     const gymEquipmentService = new GymEquipmentService(connection);
     const exerciseService = new ExerciseService(connection);
+    const trainingService = new TrainingService(connection);
 
     const authController = new AuthController(userService, sessionService);
     const userController = new UserController(userService, sessionService);
@@ -25,6 +44,7 @@ const startServer = async () => {
     const gymController = new GymController(gymService, sessionService);
     const gymEquipmentController = new GymEquipmentController(gymEquipmentService, sessionService);
     const exerciseController = new ExerciseController(exerciseService, sessionService);
+    const trainingController = new TrainingController(trainingService, sessionService);
 
     await bootstrap(userService);
 
@@ -35,6 +55,7 @@ const startServer = async () => {
     app.use('/api/gyms', gymController.buildRouter());
     app.use('/api/gym-equipments', gymEquipmentController.buildRouter());
     app.use('/api/exercises', exerciseController.buildRouter());
+    app.use('/api/trainings', trainingController.buildRouter());
 
     app.listen(3000, () => console.log(`Listening on port 3000`));
 }
