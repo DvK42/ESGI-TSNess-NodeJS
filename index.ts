@@ -10,7 +10,9 @@ import {
     GymController,
     GymEquipmentController,
     ExerciseController,
-    TrainingController
+    TrainingController,
+    ChallengeController,
+    ChallengeTryController
 } from "./controllers";
 import {
     UserService,
@@ -25,7 +27,6 @@ import {
     ChallengeTryService
 } from "./services";
 import { FIRST_ACCOUNT_EMAIL, FIRST_ACCOUNT_PASSWORD } from "./utils/tools";
-import { ChallengeController } from "./controllers/challengeController";
 
 const startServer = async () => {
     const app = express();
@@ -39,8 +40,8 @@ const startServer = async () => {
     const gymEquipmentService = new GymEquipmentService(connection);
     const exerciseService = new ExerciseService(connection);
     const trainingService = new TrainingService(connection);
-    const challengeService = new ChallengeService(connection, trainingService);
     const challengeTryService = new ChallengeTryService(connection);
+    const challengeService = new ChallengeService(connection, trainingService, challengeTryService);
 
     const authController = new AuthController(userService, sessionService);
     const userController = new UserController(userService, sessionService);
@@ -51,6 +52,7 @@ const startServer = async () => {
     const exerciseController = new ExerciseController(exerciseService, sessionService);
     const trainingController = new TrainingController(trainingService, sessionService);
     const challengeController = new ChallengeController(challengeService, sessionService);
+    const challengeTryController = new ChallengeTryController(challengeTryService, sessionService);
 
     await bootstrap(userService);
 
@@ -63,6 +65,7 @@ const startServer = async () => {
     app.use('/api/exercises', exerciseController.buildRouter());
     app.use('/api/trainings', trainingController.buildRouter());
     app.use('/api/challenges', challengeController.buildRouter());
+    app.use('/api/tries', challengeTryController.buildRouter());
 
     app.listen(3000, () => console.log(`Listening on port 3000`));
 }

@@ -1,7 +1,8 @@
 import { isValidObjectId, Model, Mongoose } from "mongoose";
 
-import { Challenge, ChallengeTry, Training, User, UserRole } from "../models";
+import { Challenge, ChallengeTry, Result, ResultData, Training, User, UserRole } from "../models";
 import { challengeTrySchema } from "../mongoose";
+import { validateResults } from "../utils/validator";
 
 export class ChallengeTryService {
   readonly challengeTryModel: Model<ChallengeTry>;
@@ -11,9 +12,28 @@ export class ChallengeTryService {
   }
 
   async createTry(challenge: Challenge, training: Training): Promise<ChallengeTry> {
+    const targetResults = (challenge.targetResults as Result[]).reduce((acc: { [key: string]: ResultData }, curr: Result) => ({
+      ...acc,
+      [typeof curr.exercise === 'string' ? curr.exercise : curr.exercise._id]: curr.data,
+    }), {});
+      
+    const trainingResults = (training.results as Result[]).reduce((acc: { [key: string]: ResultData }, curr: Result) => ({
+      ...acc,
+      [typeof curr.exercise === 'string' ? curr.exercise : curr.exercise._id]: curr.data,
+    }), {});
+
+    const isCompleted = Object.entries(targetResults).every(([exerciseId, targetResult]) => {
+      if (!trainingResults[exerciseId]) {
+        return false;
+      }
+
+      return validateResults(targetResult, trainingResults[exerciseId]);
+    })
+
     const createTry = await this.challengeTryModel.create({
       challenge: challenge._id,
       training: training._id,
+      isCompleted,
     });
 
     const populatedTry = await this.challengeTryModel.findById(createTry._id)
@@ -27,25 +47,58 @@ export class ChallengeTryService {
     return populatedTry;
   }
 
+  async findTryById(user: User, tryId: string): Promise<ChallengeTry | null> {
+    if (!isValidObjectId(tryId)) {
+      return null;
+    }
+
+    const userTry = await this.challengeTryModel.findById(tryId)
+      .populate('challenge')
+      .populate({
+        path: 'training',
+        populate: { path: 'user' },
+      });
+
+    if (!userTry || ((userTry.training as Training).user !== user._id && user.role !== UserRole.ADMIN)) {
+      throw new Error("Try not found or user does not have permission to access it");
+    }
+
+    return userTry;
+  }
+
   async findTries(userId: string, limit?: number, offset?: number): Promise<ChallengeTry[]> {
-    const query = this.challengeTryModel.find({ training: { user: userId } })
-      .populate('training')
+    if (!isValidObjectId(userId)) {
+      return [];
+    }
+    
+    const query = this.challengeTryModel.find()
+      .populate({
+        path: 'training',
+        match: { user: userId },
+      })
       .populate('challenge')
       .sort({ createdAt: -1 });
-
+      
     if (limit) {
       query.limit(limit);
     }
     if (offset) {
       query.skip(offset);
     }
-
+    
     return query;
   }
 
   async findTriesByChallenge(userId: string, challengeId: string, limit?: number, offset?: number): Promise<ChallengeTry[]> {
-    const query = this.challengeTryModel.find({ challenge: { _id: challengeId }, training: { user: userId } })
-      .populate('training')
+    if (!isValidObjectId(userId) || !isValidObjectId(challengeId)) {
+      return [];
+    }
+
+    const query = this.challengeTryModel.find({ challenge: challengeId })
+      .populate({
+        path: 'training',
+        match: { user: userId },
+      })
       .populate('challenge')
       .sort({ createdAt: -1 });
 
