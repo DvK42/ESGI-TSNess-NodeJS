@@ -8,3 +8,4 @@ export * from './exerciseController';
 export * from './trainingController';
 export * from './challengeController';
 export * from './challengeTryController';
+export * from "./challengeGroupTryController";
