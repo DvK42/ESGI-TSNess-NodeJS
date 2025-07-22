@@ -4,6 +4,7 @@ import { Challenge, Result, ResultData, User, UserRole } from "../models";
 import { challengeSchema, resultSchema } from "../mongoose";
 import { TrainingService } from "./trainingService";
 import { validateResults } from "../utils/validator";
+import { ChallengeTryService } from "./challengeTryService";
 
 export type createChallenge = Omit<Challenge, '_id' | 'createdAt' | 'updatedAt' | 'creator'> & {
   results?: Array<Omit<Result, '_id' | 'createdAt' | 'updatedAt'>>;
@@ -20,6 +21,7 @@ export class ChallengeService {
   constructor(
     public readonly connection: Mongoose,
     public readonly trainingService: TrainingService,
+    public readonly challengeTryService: ChallengeTryService,
   ) {
     this.challengeModel = connection.model('Challenge', challengeSchema);
     this.resultModel = connection.model('Result', resultSchema);
@@ -136,27 +138,9 @@ export class ChallengeService {
       return false;
     }
 
-    const targetResults = (challenge.targetResults as Result[]).reduce((acc: { [key: string]: ResultData }, curr: Result) => ({
-      ...acc,
-      [typeof curr.exercise === 'string' ? curr.exercise : curr.exercise._id]: curr.data,
-    }), {});
-      
-    const trainingResults = (training.results as Result[]).reduce((acc: { [key: string]: ResultData }, curr: Result) => ({
-      ...acc,
-      [typeof curr.exercise === 'string' ? curr.exercise : curr.exercise._id]: curr.data,
-    }), {});
+    const userTry = await this.challengeTryService.createTry(challenge, training);
 
-    const isCompleted = Object.entries(targetResults).every(([exerciseId, targetResult]) => {
-      if (!trainingResults[exerciseId]) {
-        return false;
-      }
-
-      return validateResults(targetResult, trainingResults[exerciseId]);
-    })
-
-    // save en bdd a implementer
-
-    return isCompleted;
+    return userTry.isCompleted;
   }
 
   async updateChallenge(challengeId: string, user: User, updates: Partial<UpdateChallenge>): Promise<Challenge | null> {

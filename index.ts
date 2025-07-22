@@ -11,6 +11,8 @@ import {
   GymEquipmentController,
   ExerciseController,
   TrainingController,
+  ChallengeController,
+  ChallengeTryController
 } from "./controllers";
 import {
   UserService,
@@ -41,54 +43,38 @@ const startServer = async () => {
   const gymEquipmentService = new GymEquipmentService(connection);
   const exerciseService = new ExerciseService(connection);
   const trainingService = new TrainingService(connection);
-  const challengeService = new ChallengeService(connection, trainingService);
   const challengeTryService = new ChallengeTryService(connection);
+  const challengeService = new ChallengeService(connection, trainingService, challengeTryService);
   const challengeGroupTryService = new ChallengeGroupTryService(connection);
 
   const authController = new AuthController(userService, sessionService);
   const userController = new UserController(userService, sessionService);
-  const exerciseTypeController = new ExerciseTypeController(
-    exerciseTypeService,
-    sessionService
-  );
-  const equipmentController = new EquipmentController(
-    equipmentService,
-    sessionService
-  );
+  const exerciseTypeController = new ExerciseTypeController(exerciseTypeService, sessionService);
+  const equipmentController = new EquipmentController(equipmentService, sessionService);
   const gymController = new GymController(gymService, sessionService);
-  const gymEquipmentController = new GymEquipmentController(
-    gymEquipmentService,
-    sessionService
-  );
-  const exerciseController = new ExerciseController(
-    exerciseService,
-    sessionService
-  );
-  const trainingController = new TrainingController(
-    trainingService,
-    sessionService
-  );
-  const challengeController = new ChallengeController(
-    challengeService,
-    sessionService
-  );
+  const gymEquipmentController = new GymEquipmentController(gymEquipmentService, sessionService);
+  const exerciseController = new ExerciseController(exerciseService, sessionService);
+  const trainingController = new TrainingController(trainingService, sessionService);
+  const challengeController = new ChallengeController(challengeService, sessionService);
+  const challengeTryController = new ChallengeTryController(challengeTryService, sessionService);
   const challengeGroupTryController = new ChallengeGroupTryController(
-    challengeGroupTryService,
-    sessionService,
-    userService
-  );
+  challengeGroupTryService,
+  sessionService,
+  userService
+);
 
   await bootstrap(userService);
 
-  app.use("/api", authController.buildRouter());
-  app.use("/api/users", userController.buildRouter());
-  app.use("/api/exercise-types", exerciseTypeController.buildRouter());
-  app.use("/api/equipments", equipmentController.buildRouter());
-  app.use("/api/gyms", gymController.buildRouter());
-  app.use("/api/gym-equipments", gymEquipmentController.buildRouter());
-  app.use("/api/exercises", exerciseController.buildRouter());
-  app.use("/api/trainings", trainingController.buildRouter());
-  app.use("/api/challenges", challengeController.buildRouter());
+  app.use('/api', authController.buildRouter());
+  app.use('/api/users', userController.buildRouter());
+  app.use('/api/exercise-types', exerciseTypeController.buildRouter());
+  app.use('/api/equipments', equipmentController.buildRouter());
+  app.use('/api/gyms', gymController.buildRouter());
+  app.use('/api/gym-equipments', gymEquipmentController.buildRouter());
+  app.use('/api/exercises', exerciseController.buildRouter());
+  app.use('/api/trainings', trainingController.buildRouter());
+  app.use('/api/challenges', challengeController.buildRouter());
+  app.use('/api/tries', challengeTryController.buildRouter());
   app.use("/api/groups", challengeGroupTryController.buildRouter());
 
   app.listen(3000, () => console.log(`Listening on port 3000`));
