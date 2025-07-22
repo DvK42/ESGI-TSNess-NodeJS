@@ -3,91 +3,118 @@ import express from "express";
 import { openConnection } from "./mongoose";
 import { UserRole } from "./models";
 import {
-    AuthController,
-    ExerciseTypeController,
-    UserController,
-    EquipmentController,
-    GymController,
-    GymEquipmentController,
-    ExerciseController,
-    TrainingController
+  AuthController,
+  ExerciseTypeController,
+  UserController,
+  EquipmentController,
+  GymController,
+  GymEquipmentController,
+  ExerciseController,
+  TrainingController,
 } from "./controllers";
 import {
-    UserService,
-    SessionService,
-    EquipmentService,
-    ExerciseTypeService,
-    GymService,
-    GymEquipmentService,
-    ExerciseService,
-    TrainingService,
-    ChallengeService,
-    ChallengeTryService
+  UserService,
+  SessionService,
+  EquipmentService,
+  ExerciseTypeService,
+  GymService,
+  GymEquipmentService,
+  ExerciseService,
+  TrainingService,
+  ChallengeService,
+  ChallengeTryService,
+  ChallengeGroupTryService,
 } from "./services";
 import { FIRST_ACCOUNT_EMAIL, FIRST_ACCOUNT_PASSWORD } from "./utils/tools";
 import { ChallengeController } from "./controllers/challengeController";
+import { ChallengeGroupTryController } from "./controllers/challengeGroupTryController";
 
 const startServer = async () => {
-    const app = express();
-    const connection = await openConnection();
+  const app = express();
+  const connection = await openConnection();
 
-    const userService = new UserService(connection);
-    const sessionService = new SessionService(connection);
-    const exerciseTypeService = new ExerciseTypeService(connection);
-    const equipmentService = new EquipmentService(connection);
-    const gymService = new GymService(connection);
-    const gymEquipmentService = new GymEquipmentService(connection);
-    const exerciseService = new ExerciseService(connection);
-    const trainingService = new TrainingService(connection);
-    const challengeService = new ChallengeService(connection, trainingService);
-    const challengeTryService = new ChallengeTryService(connection);
+  const userService = new UserService(connection);
+  const sessionService = new SessionService(connection);
+  const exerciseTypeService = new ExerciseTypeService(connection);
+  const equipmentService = new EquipmentService(connection);
+  const gymService = new GymService(connection);
+  const gymEquipmentService = new GymEquipmentService(connection);
+  const exerciseService = new ExerciseService(connection);
+  const trainingService = new TrainingService(connection);
+  const challengeService = new ChallengeService(connection, trainingService);
+  const challengeTryService = new ChallengeTryService(connection);
+  const challengeGroupTryService = new ChallengeGroupTryService(connection);
 
-    const authController = new AuthController(userService, sessionService);
-    const userController = new UserController(userService, sessionService);
-    const exerciseTypeController = new ExerciseTypeController(exerciseTypeService, sessionService);
-    const equipmentController = new EquipmentController(equipmentService, sessionService);
-    const gymController = new GymController(gymService, sessionService);
-    const gymEquipmentController = new GymEquipmentController(gymEquipmentService, sessionService);
-    const exerciseController = new ExerciseController(exerciseService, sessionService);
-    const trainingController = new TrainingController(trainingService, sessionService);
-    const challengeController = new ChallengeController(challengeService, sessionService);
+  const authController = new AuthController(userService, sessionService);
+  const userController = new UserController(userService, sessionService);
+  const exerciseTypeController = new ExerciseTypeController(
+    exerciseTypeService,
+    sessionService
+  );
+  const equipmentController = new EquipmentController(
+    equipmentService,
+    sessionService
+  );
+  const gymController = new GymController(gymService, sessionService);
+  const gymEquipmentController = new GymEquipmentController(
+    gymEquipmentService,
+    sessionService
+  );
+  const exerciseController = new ExerciseController(
+    exerciseService,
+    sessionService
+  );
+  const trainingController = new TrainingController(
+    trainingService,
+    sessionService
+  );
+  const challengeController = new ChallengeController(
+    challengeService,
+    sessionService
+  );
+  const challengeGroupTryController = new ChallengeGroupTryController(
+    challengeGroupTryService,
+    sessionService,
+    userService
+  );
 
-    await bootstrap(userService);
+  await bootstrap(userService);
 
-    app.use('/api', authController.buildRouter());
-    app.use('/api/users', userController.buildRouter());
-    app.use('/api/exercise-types', exerciseTypeController.buildRouter());
-    app.use('/api/equipments', equipmentController.buildRouter());
-    app.use('/api/gyms', gymController.buildRouter());
-    app.use('/api/gym-equipments', gymEquipmentController.buildRouter());
-    app.use('/api/exercises', exerciseController.buildRouter());
-    app.use('/api/trainings', trainingController.buildRouter());
-    app.use('/api/challenges', challengeController.buildRouter());
+  app.use("/api", authController.buildRouter());
+  app.use("/api/users", userController.buildRouter());
+  app.use("/api/exercise-types", exerciseTypeController.buildRouter());
+  app.use("/api/equipments", equipmentController.buildRouter());
+  app.use("/api/gyms", gymController.buildRouter());
+  app.use("/api/gym-equipments", gymEquipmentController.buildRouter());
+  app.use("/api/exercises", exerciseController.buildRouter());
+  app.use("/api/trainings", trainingController.buildRouter());
+  app.use("/api/challenges", challengeController.buildRouter());
+  app.use("/api/groups", challengeGroupTryController.buildRouter());
 
-    app.listen(3000, () => console.log(`Listening on port 3000`));
-}
+  app.listen(3000, () => console.log(`Listening on port 3000`));
+};
 
 const bootstrap = async (userService: UserService) => {
-    if (FIRST_ACCOUNT_EMAIL === undefined) {
-        throw new Error('FIRST_ACCOUNT_EMAIL is not defined');
-    }
+  if (FIRST_ACCOUNT_EMAIL === undefined) {
+    throw new Error("FIRST_ACCOUNT_EMAIL is not defined");
+  }
 
-    if (FIRST_ACCOUNT_PASSWORD === undefined) {
-        throw new Error('FIRST_ACCOUNT_PASSWORD is not defined');
-    }
+  if (FIRST_ACCOUNT_PASSWORD === undefined) {
+    throw new Error("FIRST_ACCOUNT_PASSWORD is not defined");
+  }
 
-    const rootUser = await userService.findUser(FIRST_ACCOUNT_EMAIL);
-    if (!rootUser) {
-        // ✅ Importer le seeder APRÈS la connexion
-        // await import('./seeders/users');
-        await userService.createUser({
-            firstName: 'Admin',
-            lastName: 'Platform',
-            password: FIRST_ACCOUNT_PASSWORD,
-            email: FIRST_ACCOUNT_EMAIL,
-            role: UserRole.ADMIN
-        });
-    }
-}
+  const rootUser = await userService.findUser(FIRST_ACCOUNT_EMAIL);
+  if (!rootUser) {
+    // ✅ Importer le seeder APRÈS la connexion
+    // await import('./seeders/users');
+    await userService.createUser({
+      firstName: "Admin",
+      lastName: "Platform",
+      password: FIRST_ACCOUNT_PASSWORD,
+      email: FIRST_ACCOUNT_EMAIL,
+      role: UserRole.ADMIN,
+    });
+  }
+};
 
 startServer().catch(console.error);
