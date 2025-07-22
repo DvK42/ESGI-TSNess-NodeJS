@@ -3,6 +3,7 @@ import { json, Request, Response, Router } from "express";
 import { TrainingService, SessionService } from "../services";
 import { roleMiddleware, sessionMiddleware } from "../middlewares";
 import { UserRole } from "../models";
+import { validateResultsData } from "../utils/validator";
 
 export class TrainingController {
   constructor(
@@ -25,7 +26,7 @@ export class TrainingController {
     }
 
     if (req.body.results && Array.isArray(req.body.results)) {
-      if (!verifyResultsData(req.body)) {
+      if (!validateResultsData(req.body)) {
         res.status(400).json({ error: "Each result must have an exercise and data" });
 
         return;
@@ -122,7 +123,7 @@ export class TrainingController {
     }
 
     if (req.body.results && Array.isArray(req.body.results)) {
-      if (!verifyResultsData(req.body)) {
+      if (!validateResultsData(req.body)) {
         res.status(400).json({ error: "Each result must have an exercise and data" });
 
         return;
@@ -213,16 +214,4 @@ export class TrainingController {
 
     return router;
   }
-}
-
-const verifyResultsData = (data: any): boolean => {
-  if (data.results && Array.isArray(data.results)) {
-    data.results.forEach((result: any) => {
-      if (!result.exercise || !result.data) {
-        return false;
-      }
-    });
-  }
-
-  return true;
 }

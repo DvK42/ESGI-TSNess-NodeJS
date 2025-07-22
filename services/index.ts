@@ -6,3 +6,5 @@ export * from './equipmentService';
 export * from './gymService';
 export * from './exerciseService';
 export * from './trainingService';
+export * from './challengeService';
+export * from './challengeTryService';
