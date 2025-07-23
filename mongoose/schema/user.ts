@@ -15,6 +15,7 @@ export const userSchema: Schema<User> = new Schema(
       required: true,
     },
     isActive: { type: Boolean, default: true },
+    groups: [{ type: Schema.Types.ObjectId, ref: "ChallengeGroupTry" }],
   },
   {
     timestamps: true,

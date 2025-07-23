@@ -69,12 +69,6 @@ export class ChallengeGroupTryService {
       .populate("challenge")
       .populate("creator");
 
-    console.log(
-      !group?.users.some(
-        (userGroup) => userGroup._id.toString() === user._id.toString()
-      ),
-      group?.creator._id.toString() === user._id.toString()
-    );
     if (
       !group ||
       (!group.users.some(
