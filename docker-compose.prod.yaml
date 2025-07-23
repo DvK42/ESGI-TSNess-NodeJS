@@ -1,0 +1,22 @@
+services:
+  mongo:
+    image: mongo:latest
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    depends_on:
+      - mongo
+    ports:
+      - "3012:3000"
+
+volumes:
+  mongo-data:
