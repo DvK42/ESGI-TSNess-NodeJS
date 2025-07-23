@@ -1,7 +1,7 @@
-import { ExerciseType } from "./exerciseType";
-import { Timestamps } from "./timestamps";
-import { User } from "./user";
-import { Difficulty } from "../utils/enums/difficulty";
+import {ExerciseType} from "./exerciseType";
+import {Timestamps} from "./timestamps";
+import {User} from "./user";
+import {Difficulty} from "../utils/enums/difficulty";
 
 export interface Gym extends Timestamps {
     _id: string;
@@ -15,4 +15,5 @@ export interface Gym extends Timestamps {
     descriptionEquipments: string;
     descriptionExerciseTypes: string;
     isApproved: boolean;
+    isDeclined: boolean;
 }

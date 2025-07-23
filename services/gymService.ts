@@ -1,7 +1,7 @@
-import { Model, Mongoose, isValidObjectId } from "mongoose";
-import { Gym } from "../models";
-import { gymSchema } from "../mongoose";
-import { Difficulty } from "../utils/enums/difficulty";
+import {isValidObjectId, Model, Mongoose} from "mongoose";
+import {Gym} from "../models";
+import {gymSchema} from "../mongoose";
+import {Difficulty} from "../utils/enums/difficulty";
 
 export class GymService {
     readonly model: Model<Gym>;
@@ -22,14 +22,14 @@ export class GymService {
     }
 
     async findGymByName(name: string): Promise<Gym | null> {
-        return this.model.findOne({ name })
+        return this.model.findOne({name})
             .populate('manager')
             .populate('exerciseTypes')
             .exec();
     }
 
     async findGymsByDifficulty(difficulty: Difficulty): Promise<Gym[]> {
-        return this.model.find({ difficulty })
+        return this.model.find({difficulty})
             .populate('manager')
             .populate('exerciseTypes')
             .exec();
@@ -40,21 +40,21 @@ export class GymService {
             return [];
         }
 
-        return this.model.find({ manager: managerId })
+        return this.model.find({manager: managerId})
             .populate('manager')
             .populate('exerciseTypes')
             .exec();
     }
 
     async findApprovedGyms(): Promise<Gym[]> {
-        return this.model.find({ isApproved: true })
+        return this.model.find({isApproved: true})
             .populate('manager')
             .populate('exerciseTypes')
             .exec();
     }
 
     async findPendingGyms(): Promise<Gym[]> {
-        return this.model.find({ isApproved: false })
+        return this.model.find({isApproved: false})
             .populate('manager')
             .populate('exerciseTypes')
             .exec();
@@ -72,7 +72,7 @@ export class GymService {
         return this.model.findByIdAndUpdate(
             gymId,
             updates,
-            { new: true }
+            {new: true}
         )
             .populate('manager')
             .populate('exerciseTypes')
@@ -84,7 +84,7 @@ export class GymService {
             return false;
         }
 
-        const result = await this.model.deleteOne({ _id: gymId });
+        const result = await this.model.deleteOne({_id: gymId});
         return result.deletedCount > 0;
     }
 
@@ -102,8 +102,8 @@ export class GymService {
 
         return this.model.findByIdAndUpdate(
             gymId,
-            { isApproved: true },
-            { new: true }
+            {isApproved: true, isDeclined: false},
+            {new: true}
         )
             .populate('manager')
             .populate('exerciseTypes')
@@ -117,23 +117,9 @@ export class GymService {
 
         return this.model.findByIdAndUpdate(
             gymId,
-            { isApproved: false },
-            { new: true }
+            {isDeclined: true, isApproved: false},
+            {new: true}
         )
-            .populate('manager')
-            .populate('exerciseTypes')
-            .exec();
-    }
-
-    async searchGyms(searchTerm: string): Promise<Gym[]> {
-        return this.model.find({
-            $or: [
-                { name: { $regex: searchTerm, $options: 'i' } },
-                { address: { $regex: searchTerm, $options: 'i' } },
-                { descriptionEquipments: { $regex: searchTerm, $options: 'i' } },
-                { descriptionExerciseTypes: { $regex: searchTerm, $options: 'i' } }
-            ]
-        })
             .populate('manager')
             .populate('exerciseTypes')
             .exec();
