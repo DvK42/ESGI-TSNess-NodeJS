@@ -168,4 +168,15 @@ export class ChallengeGroupTryService {
       { $pull: { users: userId } }
     );
   }
+
+  async removeUserFromAllGroups(userId: string): Promise<void> {
+    if (!isValidObjectId(userId)) {
+      return;
+    }
+
+    await this.challengeGroupTryModel.updateMany(
+      { users: userId },
+      { $pull: { users: userId } }
+    );
+  }
 }
