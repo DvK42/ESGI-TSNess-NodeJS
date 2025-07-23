@@ -12,8 +12,8 @@ export class GymController {
     }
 
     async createGym(req: Request, res: Response) {
-        if (!req.body || !req.body.name || !req.body.capacity || !req.body.address || !req.body.contact || !req.body.manager || !req.body.exerciseTypes || !req.body.descriptionEquipments || !req.body.descriptionExerciseTypes) {
-            res.status(400).json({error: "Missing required fields: name, capacity, address, contact, manager, exerciseTypes, descriptionEquipments, descriptionExerciseTypes"});
+        if (!req.body || !req.body.name || !req.body.capacity || !req.body.address || !req.body.contact || !req.body.exerciseTypes || !req.body.descriptionEquipments || !req.body.difficulty || !req.body.descriptionExerciseTypes) {
+            res.status(400).json({error: "Missing required fields: name, capacity, address, contact, exerciseTypes, descriptionEquipments, difficulty, descriptionExerciseTypes"});
             return;
         }
 
@@ -29,6 +29,16 @@ export class GymController {
             });
             return;
         }
+
+        if (UserRole.ADMIN) {
+            req.body.isApproved = true;
+            req.body.isDeclined = false;
+        } else {
+            req.body.isDeclined = false;
+            req.body.isApproved = false;
+        }
+
+        req.body.manager = req.user;
 
         try {
             const gym = await this.gymService.createGym(req.body as Gym);
@@ -212,7 +222,7 @@ export class GymController {
         router.post(
             '/',
             sessionMiddleware(this.sessionService),
-            roleMiddleware(UserRole.ADMIN),
+            roleMiddleware(UserRole.USER),
             json(),
             this.createGym.bind(this)
         );
