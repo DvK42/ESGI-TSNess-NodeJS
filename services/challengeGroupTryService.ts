@@ -69,12 +69,6 @@ export class ChallengeGroupTryService {
       .populate("challenge")
       .populate("creator");
 
-    console.log(
-      !group?.users.some(
-        (userGroup) => userGroup._id.toString() === user._id.toString()
-      ),
-      group?.creator._id.toString() === user._id.toString()
-    );
     if (
       !group ||
       (!group.users.some(
@@ -171,6 +165,17 @@ export class ChallengeGroupTryService {
 
     await this.challengeGroupTryModel.updateOne(
       { _id: groupId },
+      { $pull: { users: userId } }
+    );
+  }
+
+  async removeUserFromAllGroups(userId: string): Promise<void> {
+    if (!isValidObjectId(userId)) {
+      return;
+    }
+
+    await this.challengeGroupTryModel.updateMany(
+      { users: userId },
       { $pull: { users: userId } }
     );
   }

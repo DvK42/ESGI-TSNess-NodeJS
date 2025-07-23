@@ -62,6 +62,12 @@ export class ChallengeGroupTryController {
       };
 
       const group = await this.challengeGroupTryService.createGroup(groupData);
+      if (group) {
+        await this.userService.model.updateMany(
+          { _id: { $in: users.map((user) => user._id) } },
+          { $push: { groups: group._id } }
+        );
+      }
       res.status(201).json(group);
     } catch (error) {
       console.error("Error creating group:", error);
@@ -146,6 +152,27 @@ export class ChallengeGroupTryController {
     }
 
     try {
+      const thisGroup = await this.challengeGroupTryService.findGroupById(
+        user,
+        id
+      );
+
+      if (!thisGroup) {
+        res.status(404).json({ error: "Group not found" });
+        return;
+      }
+
+      if (req.body.users && Array.isArray(req.body.users)) {
+        const creatorId = thisGroup.creator._id.toString();
+        const userIds = req.body.users.map((userId: string) =>
+          userId.toString()
+        );
+
+        if (!userIds.includes(creatorId)) {
+          req.body.users.push(creatorId);
+        }
+      }
+
       const updatedGroup = await this.challengeGroupTryService.updateGroup(
         id,
         user,
@@ -155,6 +182,35 @@ export class ChallengeGroupTryController {
       if (!updatedGroup) {
         res.status(404).json({ error: "Group not found or permission denied" });
         return;
+      }
+
+      const originalUserIds = thisGroup.users.map((user) =>
+        user._id.toString()
+      );
+      const updatedUserIds = updatedGroup.users.map((user) =>
+        user._id.toString()
+      );
+
+      const removedUserIds = originalUserIds.filter(
+        (userId) => !updatedUserIds.includes(userId)
+      );
+
+      const addedUserIds = updatedUserIds.filter(
+        (userId) => !originalUserIds.includes(userId)
+      );
+
+      if (removedUserIds.length > 0) {
+        await this.userService.model.updateMany(
+          { _id: { $in: removedUserIds } },
+          { $pull: { groups: id } }
+        );
+      }
+
+      if (addedUserIds.length > 0) {
+        await this.userService.model.updateMany(
+          { _id: { $in: addedUserIds } },
+          { $push: { groups: id } }
+        );
       }
 
       res.status(200).json(updatedGroup);
@@ -177,6 +233,10 @@ export class ChallengeGroupTryController {
 
     try {
       await this.challengeGroupTryService.userExitGroup(user._id, id);
+      await this.userService.model.updateOne(
+        { _id: user._id },
+        { $pull: { groups: id } }
+      );
       res.status(204).end();
     } catch (error) {
       res.status(500).json({ error: "Failed to remove user from group" });
@@ -188,7 +248,24 @@ export class ChallengeGroupTryController {
     const user = (req as any).user;
 
     try {
+      const groupToDelete = await this.challengeGroupTryService.findGroupById(
+        user,
+        id
+      );
+
+      if (!groupToDelete) {
+        res.status(404).json({ error: "Group not found" });
+        return;
+      }
+
       await this.challengeGroupTryService.deleteGroup(id, user);
+
+      const userIds = groupToDelete.users.map((user) => user._id);
+      await this.userService.model.updateMany(
+        { _id: { $in: userIds } },
+        { $pull: { groups: id } }
+      );
+
       res.status(204).end();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete group" });

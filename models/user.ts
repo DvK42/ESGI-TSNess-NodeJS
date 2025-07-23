@@ -1,9 +1,10 @@
+import { ChallengeGroupTry } from "./challengeGroupTry";
 import { Timestamps } from "./timestamps";
 
 export enum UserRole {
-  ADMIN = 'ADMIN',
-  DIRECTOR = 'DIRECTOR',
-  USER = 'USER'
+  ADMIN = "ADMIN",
+  DIRECTOR = "DIRECTOR",
+  USER = "USER",
 }
 
 export const getUserRoleLevel = (role: UserRole): number => {
@@ -17,7 +18,7 @@ export const getUserRoleLevel = (role: UserRole): number => {
     default:
       return 0;
   }
-}
+};
 
 export interface User extends Timestamps {
   _id: string;
@@ -27,4 +28,5 @@ export interface User extends Timestamps {
   password: string;
   role: UserRole;
   isActive: boolean;
+  groups?: ChallengeGroupTry[];
 }
