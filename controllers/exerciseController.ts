@@ -11,8 +11,8 @@ export class ExerciseController {
     ) { }
 
     async createExercise(req: Request, res: Response) {
-        if (!req.body || !req.body.name || !req.body.description || !req.body.difficulty || !req.body.equipment || !req.body.nbSeries || !req.body.nbRepetitions) {
-            res.status(400).json({ error: "Missing required fields: name, description, difficulty, equipment, nbSeries, nbRepetitions" });
+        if (!req.body || !req.body.name || !req.body.description || !req.body.difficulty || !req.body.equipment) {
+            res.status(400).json({ error: "Missing required fields: name, description, difficulty, equipment" });
             return;
         }
 
@@ -21,16 +21,6 @@ export class ExerciseController {
                 error: "Invalid difficulty",
                 validDifficulties: Object.values(Difficulty)
             });
-            return;
-        }
-
-        if (req.body.nbSeries < 1) {
-            res.status(400).json({ error: "Number of series must be at least 1" });
-            return;
-        }
-
-        if (req.body.nbRepetitions < 1) {
-            res.status(400).json({ error: "Number of repetitions must be at least 1" });
             return;
         }
 
@@ -72,7 +62,7 @@ export class ExerciseController {
     async updateExercise(req: Request, res: Response) {
         const { id } = req.params;
 
-        if (!req.body || (!req.body.name && !req.body.description && !req.body.difficulty && !req.body.equipment && !req.body.nbSeries && !req.body.nbRepetitions)) {
+        if (!req.body || (!req.body.name && !req.body.description && !req.body.difficulty && !req.body.equipment)) {
             res.status(400).json({ error: "At least one field is required" });
             return;
         }
@@ -82,16 +72,6 @@ export class ExerciseController {
                 error: "Invalid difficulty",
                 validDifficulties: Object.values(Difficulty)
             });
-            return;
-        }
-
-        if (req.body.nbSeries !== undefined && req.body.nbSeries < 1) {
-            res.status(400).json({ error: "Number of series must be at least 1" });
-            return;
-        }
-
-        if (req.body.nbRepetitions !== undefined && req.body.nbRepetitions < 1) {
-            res.status(400).json({ error: "Number of repetitions must be at least 1" });
             return;
         }
 
