@@ -2,6 +2,7 @@ import { json, Request, Response, Router } from "express";
 import {
   ChallengeGroupTryService,
   SessionService,
+  UserBadgeService,
   UserService,
 } from "../services";
 import { UserRole, User } from "../models";
@@ -11,7 +12,8 @@ export class ChallengeGroupTryController {
   constructor(
     public readonly challengeGroupTryService: ChallengeGroupTryService,
     public readonly sessionService: SessionService,
-    public readonly userService: UserService
+    public readonly userService: UserService,
+    public readonly userBadgeService: UserBadgeService,
   ) {}
 
   async createGroup(req: Request, res: Response) {
@@ -73,6 +75,8 @@ export class ChallengeGroupTryController {
       console.error("Error creating group:", error);
       res.status(500).json({ error: "Failed to create group" });
     }
+
+    this.userBadgeService.updateUserBadges(myUser._id);
   }
 
   async getAllGroups(req: Request, res: Response) {
@@ -217,6 +221,8 @@ export class ChallengeGroupTryController {
     } catch (error) {
       res.status(500).json({ error: "Failed to update group" });
     }
+
+    this.userBadgeService.updateUserBadges(user._id);
   }
 
   async removeUserFromGroup(req: Request, res: Response) {

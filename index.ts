@@ -4,6 +4,7 @@ import { openConnection } from "./mongoose";
 import { UserRole } from "./models";
 import {
   AuthController,
+  BadgeController,
   ChallengeController,
   ChallengeGroupTryController,
   ChallengeTryController,
@@ -16,6 +17,7 @@ import {
   UserController,
 } from "./controllers";
 import {
+    BadgeService,
   ChallengeGroupTryService,
   ChallengeService,
   ChallengeTryService,
@@ -26,6 +28,7 @@ import {
   GymService,
   SessionService,
   TrainingService,
+  UserBadgeService,
   UserService,
 } from "./services";
 import { FIRST_ACCOUNT_EMAIL, FIRST_ACCOUNT_PASSWORD } from "./utils/tools";
@@ -49,12 +52,15 @@ const startServer = async () => {
     challengeTryService
   );
   const challengeGroupTryService = new ChallengeGroupTryService(connection);
+    const badgeService = new BadgeService(connection);
+    const userBadgeService = new UserBadgeService(connection, badgeService, trainingService, userService);
 
   const authController = new AuthController(userService, sessionService);
   const userController = new UserController(
     userService,
     sessionService,
-    challengeGroupTryService
+    challengeGroupTryService,
+    userBadgeService,
   );
   const exerciseTypeController = new ExerciseTypeController(
     exerciseTypeService,
@@ -76,7 +82,7 @@ const startServer = async () => {
   const trainingController = new TrainingController(
     trainingService,
     sessionService
-  );
+  , userBadgeService);
   const challengeController = new ChallengeController(
     challengeService,
     sessionService
@@ -88,8 +94,10 @@ const startServer = async () => {
   const challengeGroupTryController = new ChallengeGroupTryController(
     challengeGroupTryService,
     sessionService,
-    userService
+    userService,
+    userBadgeService,
   );
+    const badgeController = new BadgeController(badgeService, sessionService, userBadgeService);
 
   await bootstrap(userService);
 
@@ -104,6 +112,7 @@ const startServer = async () => {
   app.use("/api/challenges", challengeController.buildRouter());
   app.use("/api/tries", challengeTryController.buildRouter());
   app.use("/api/groups", challengeGroupTryController.buildRouter());
+  app.use("/api/badges", badgeController.buildRouter());
 
   app.listen(3000, () => console.log(`Listening on port 3000`));
 };

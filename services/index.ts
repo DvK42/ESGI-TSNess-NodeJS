@@ -9,3 +9,5 @@ export * from "./trainingService";
 export * from "./challengeService";
 export * from "./challengeTryService";
 export * from "./challengeGroupTryService";
+export * from "./badgeService";
+export * from "./userBadgeService";

@@ -31,8 +31,8 @@ export class ChallengeController {
       return;
     }
 
-    if (req.body.targetResults && Array.isArray(req.body.results)) {
-      if (!validateResultsData(req.body)) {
+    if (req.body.targetResults) {
+      if (!validateResultsData(req.body.targetResults)) {
         res.status(400).json({ error: "Each result must have an exercise and data" });
 
         return;
@@ -196,8 +196,8 @@ export class ChallengeController {
       return;
     }
 
-    if (req.body.targetResults && Array.isArray(req.body.targetResults)) {
-      if (!validateResultsData(req.body)) {
+    if (req.body.targetResults) {
+      if (!validateResultsData(req.body.targetsResults)) {
         res.status(400).json({ error: "Each result must have an exercise and data" });
 
         return;

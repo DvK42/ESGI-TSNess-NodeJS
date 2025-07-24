@@ -23,6 +23,17 @@ export class UserService {
         return this.model.findOne(filter);
     }
 
+    async findUserById(userId: string): Promise<User | null> {
+        if (!isValidObjectId(userId)) {
+            return null;
+        }
+
+        return this.model.findById(userId)
+            .populate('groups');
+        // todo implement 'with' into badge
+        // .populate('challengeTries')
+    }
+
     async createUser(user: CreateUser): Promise<User> {
         return this.model.create({...user, password: sha256(user.password)});
     }
