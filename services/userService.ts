@@ -64,16 +64,23 @@ export class UserService {
             return;
         }
 
-        // D'abord récupérer l'utilisateur pour connaître son état actuel
         const user = await this.model.findById(userId);
         if (!user) {
             return;
         }
 
-        // Inverser l'état d'activation
         await this.model.updateOne(
             {_id: userId},
             {$set: {isActive: !user.isActive}}
         );
     }
+
+    async updateScore(userId: string, score: number): Promise<void> {
+        if (!isValidObjectId(userId)) {
+            return;
+        }
+
+        await this.model.updateOne({_id: userId}, {$set: {score}});
+    }
+
 }
