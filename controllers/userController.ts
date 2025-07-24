@@ -1,31 +1,18 @@
 import {json, Request, Response, Router} from "express";
 
-import {
-  ChallengeGroupTryService,
-  SessionService,
-  UserBadgeService,
-  UserService,
-} from "../services";
-import { roleMiddleware, sessionMiddleware } from "../middlewares";
-import { UserRole } from "../models";
+import {ChallengeGroupTryService, SessionService, UserBadgeService, UserService,} from "../services";
+import {roleMiddleware, sessionMiddleware} from "../middlewares";
+import {UserRole} from "../models";
 
 export class UserController {
-  constructor(
-    public readonly userService: UserService,
-    public readonly sessionService: SessionService,
-    public readonly challengeGroupTryService: ChallengeGroupTryService,
-    public readonly userBadgeService: UserBadgeService,
-  ) {}
-
-  async createUser(req: Request, res: Response) {
-    if (
-      !req.body ||
-      !req.body.email ||
-      !req.body.password ||
-      !req.body.lastName ||
-      !req.body.firstName
+    constructor(
+        public readonly userService: UserService,
+        public readonly sessionService: SessionService,
+        public readonly challengeGroupTryService: ChallengeGroupTryService,
+        public readonly userBadgeService: UserBadgeService,
     ) {
     }
+
 
     async createUser(req: Request, res: Response) {
         if (
@@ -120,6 +107,22 @@ export class UserController {
         }
     }
 
+    async getUserBadges(req: Request, res: Response) {
+        const userId = req.user?._id ?? undefined;
+        if (!userId) {
+            res.status(400).json({error: "User ID is required"});
+            return;
+        }
+
+        try {
+            const badges = await this.userBadgeService.findUserBadges(userId);
+            res.json(badges);
+        } catch (error) {
+            console.error("Error getting user badges:", error);
+            res.status(404).json({error: "User not found or no badges available"});
+        }
+    }
+
     buildRouter(): Router {
         const router = Router();
 
@@ -129,6 +132,13 @@ export class UserController {
             roleMiddleware(UserRole.ADMIN),
             json(),
             this.createUser.bind(this)
+        );
+
+        router.get(
+            "/badges",
+            sessionMiddleware(this.sessionService),
+            roleMiddleware(UserRole.USER),
+            this.getUserBadges.bind(this)
         );
 
         router.put(
@@ -156,65 +166,4 @@ export class UserController {
 
         return router;
     }
-  }
-
-  async getUserBadges(req: Request, res: Response) {
-    const userId = req.user?._id ?? undefined;
-    if (!userId) {
-      res.status(400).json({ error: "User ID is required" });
-      return;
-    }
-
-    try {
-      const badges = await this.userBadgeService.findUserBadges(userId);
-      res.json(badges);
-    } catch (error) {
-      console.error("Error getting user badges:", error);
-      res.status(404).json({ error: "User not found or no badges available" });
-    }
-  }
-
-  buildRouter(): Router {
-    const router = Router();
-
-    router.post(
-      "/",
-      sessionMiddleware(this.sessionService),
-      roleMiddleware(UserRole.ADMIN),
-      json(),
-      this.createUser.bind(this)
-    );
-
-    router.get(
-      "/badges",
-      sessionMiddleware(this.sessionService),
-      roleMiddleware(UserRole.USER),
-      this.getUserBadges.bind(this)
-    );
-
-    router.put(
-      "/:id/toggle-activation",
-      sessionMiddleware(this.sessionService),
-      roleMiddleware(UserRole.ADMIN),
-      json(),
-      this.toggleUserActivation.bind(this)
-    );
-
-    router.put(
-      "/:id/update-role",
-      sessionMiddleware(this.sessionService),
-      roleMiddleware(UserRole.ADMIN),
-      json(),
-      this.updateRole.bind(this)
-    );
-
-    router.delete(
-      "/:id",
-      sessionMiddleware(this.sessionService),
-      roleMiddleware(UserRole.ADMIN),
-      this.deleteUser.bind(this)
-    );
-
-    return router;
-  }
 }
