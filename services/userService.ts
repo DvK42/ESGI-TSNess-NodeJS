@@ -28,7 +28,10 @@ export class UserService {
             return null;
         }
 
-        return this.model.findById(userId);
+        return this.model.findById(userId)
+            .populate('groups');
+        // todo implement 'with' into badge
+        // .populate('challengeTries')
     }
 
     async createUser(user: CreateUser): Promise<User> {

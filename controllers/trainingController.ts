@@ -1,6 +1,6 @@
 import { json, Request, Response, Router } from "express";
 
-import { TrainingService, SessionService } from "../services";
+import { TrainingService, SessionService, UserBadgeService } from "../services";
 import { roleMiddleware, sessionMiddleware } from "../middlewares";
 import { UserRole } from "../models";
 import { validateResultsData } from "../utils/validator";
@@ -8,7 +8,8 @@ import { validateResultsData } from "../utils/validator";
 export class TrainingController {
   constructor(
     public readonly trainingService: TrainingService,
-    public readonly sessionService: SessionService
+    public readonly sessionService: SessionService,
+    public readonly userBadgeService: UserBadgeService,
   ) {}
 
   async createTraining(req: Request, res: Response) {
@@ -25,8 +26,8 @@ export class TrainingController {
       return;
     }
 
-    if (req.body.results && Array.isArray(req.body.results)) {
-      if (!validateResultsData(req.body)) {
+    if (req.body.results) {
+      if (!validateResultsData(req.body.results)) {
         res.status(400).json({ error: "Each result must have an exercise and data" });
 
         return;
@@ -45,7 +46,11 @@ export class TrainingController {
       console.error('Error creating training:', error);
 
       res.status(500).json({ error: "Failed to create training" });
+
+      return;
     }
+
+    this.userBadgeService.updateUserBadges(user._id)
   }
 
   async getTraining(req: Request, res: Response) {
@@ -122,8 +127,8 @@ export class TrainingController {
       return;
     }
 
-    if (req.body.results && Array.isArray(req.body.results)) {
-      if (!validateResultsData(req.body)) {
+    if (req.body.results) {
+      if (!validateResultsData(req.body.results)) {
         res.status(400).json({ error: "Each result must have an exercise and data" });
 
         return;
@@ -144,6 +149,8 @@ export class TrainingController {
 
       res.status(500).json({ error: "Failed to update training" });
     }
+
+    this.userBadgeService.updateUserBadges(user._id)
   }
 
   async deleteTraining(req: Request, res: Response) {
