@@ -78,13 +78,6 @@ export class BadgeController {
       this.create.bind(this)
     );
 
-    router.get(
-      '/',
-      sessionMiddleware(this.sessionService),
-      roleMiddleware(UserRole.USER),
-      this.getAll.bind(this)
-    );
-
     return router;
   }
 }
