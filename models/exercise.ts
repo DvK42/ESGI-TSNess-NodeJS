@@ -8,6 +8,4 @@ export interface Exercise extends Timestamps {
     description: string;
     difficulty: Difficulty;
     equipment: Equipment;
-    nbSeries: number;
-    nbRepetitions: number;
 }

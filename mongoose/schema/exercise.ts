@@ -7,8 +7,6 @@ export const exerciseSchema = new Schema<Exercise>({
         description: {type: String, required: true},
         difficulty: {type: String, required: true, enum: Object.values(Difficulty)},
         equipment: {type: Schema.Types.ObjectId, ref: "Equipment", required: true},
-        nbSeries: {type: Number, required: true},
-        nbRepetitions: {type: Number, required: true},
     },
     {
         timestamps: true,
