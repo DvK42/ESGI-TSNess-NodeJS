@@ -23,6 +23,14 @@ export class UserService {
         return this.model.findOne(filter);
     }
 
+    async findUserById(userId: string): Promise<User | null> {
+        if (!isValidObjectId(userId)) {
+            return null;
+        }
+
+        return this.model.findById(userId);
+    }
+
     async createUser(user: CreateUser): Promise<User> {
         return this.model.create({...user, password: sha256(user.password)});
     }
@@ -53,16 +61,23 @@ export class UserService {
             return;
         }
 
-        // D'abord récupérer l'utilisateur pour connaître son état actuel
         const user = await this.model.findById(userId);
         if (!user) {
             return;
         }
 
-        // Inverser l'état d'activation
         await this.model.updateOne(
             {_id: userId},
             {$set: {isActive: !user.isActive}}
         );
     }
+
+    async updateScore(userId: string, score: number): Promise<void> {
+        if (!isValidObjectId(userId)) {
+            return;
+        }
+
+        await this.model.updateOne({_id: userId}, {$set: {score}});
+    }
+
 }
